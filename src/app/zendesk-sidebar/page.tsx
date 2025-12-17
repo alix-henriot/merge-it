@@ -1,20 +1,64 @@
-"use client"
-import { Button } from "@/components/ui/button";
-import { useZafClient } from "@/hooks/useZafClient";
-import { Merge } from "lucide-react";
+"use client";
 
-
+import { useEffect, useState } from "react";
+import { useZafClient } from "@/hooks/use-zaf-client";
+import type { Ticket } from "node-zendesk/clients/core/tickets";
+import { Spinner } from "@/components/ui/spinner";
+import TicketCard from "@/components/ticket/ticket-card";
+import { getRequesterTickets } from "../actions/zendesk/tickets";
+import { mergeTickets } from "../actions/zendesk/merge";
 
 export default function SidebarPage() {
-    const client = useZafClient();
+  const client = useZafClient();
 
-    return (
-        <div className="w-full max-h-72 flex flex-col p-3 space-y-2 bg-background">
-            <div className="flex text-base px-3 py-2 rounded-lg border border-ring text-foreground shadow-lg shadow-foreground/5">Ticket 17490
-                <Button variant="outline" size="icon" aria-label="Merge">
-                    <Merge/>
-                </Button>
-            </div>
-        </div>
-    )
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!client) return;
+
+    const fetchRequesterTickets = async () => {
+      try {
+        const data = await client.get(["ticket.requester.id"]);
+
+        const requesterId = Number(data["ticket.requester.id"]);
+
+        const { tickets } = await getRequesterTickets(requesterId);
+        setTickets(tickets);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRequesterTickets();
+  }, [client]);
+
+  const handleMerge = async (sourceTicketId: number): Promise<{ success: boolean }> => {
+    setLoading(true);
+    try {
+      const data = await client?.get("ticket.id");
+      if (!data) return { success: false };
+      const targetTicketId = Number(data["ticket.id"]);
+      const res = await mergeTickets(sourceTicketId, targetTicketId);
+
+      return res;
+    } catch (err) {
+      console.error(err);
+      return { success: false };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="w-full flex flex-col p-3 space-y-2 bg-background overflow-y-auto">
+      {loading && <Spinner />}
+
+      {tickets.map((ticket) => (
+        <TicketCard key={ticket.id} ticket={ticket} handleMerge={handleMerge} />
+      ))}
+    </div>
+  );
 }

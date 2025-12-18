@@ -1,0 +1,19 @@
+{
+  "name": "merge-it",
+  "author": {
+    "name": "Alix Henriot",
+    "email": "alix.henriot@outlook.fr"
+  },
+  "defaultLocale": "en",
+  "private": true,
+  "location": {
+    "support": {
+      "ticket_sidebar": {
+        "url": "http://localhost:3000/zendesk-sidebar",
+        "flexible": true
+      }
+    }
+  },
+  "version": "1.0.0",
+  "frameworkVersion": "2.0"
+}

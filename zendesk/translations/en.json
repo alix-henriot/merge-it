@@ -1,0 +1,8 @@
+{
+  "app": {
+    "name": "Merge It",
+    "short_description": "Visualize and merge tickets.",
+    "long_description": "Visualize and merge tickets.",
+    "installation_instructions": "Simply click install."
+  }
+}

@@ -1,3 +1,4 @@
+"use client"
 import { ButtonGroup } from "../ui/button-group";
 import { Button } from "../ui/button";
 import { Merge, MoreHorizontalIcon } from "lucide-react";
@@ -24,16 +25,14 @@ export default function TicketButtonGroup({ id, handleMerge }: TicketMergeProps)
         variant="outline"
         size="sm"
         aria-label="Merge ticket"
-        //disabled={mergingId === ticket.id}
         onClick={() => {
-          toast.promise<{ success: boolean }>(handleMerge(id), {
+          toast.promise(handleMerge(id), {
             loading: "Merging...",
-            success: "Ticket has been merged",
-            error: "Sorry, it didn't work",
+            success: () => `Ticket #${id} has been merged into ticket successfully`,
+            error: () => `Failed to merge`,
           });
         }}
       >
-        {/* {loading ? <Spinner /> : <Merge className="h-4 w-4" />} */}
         <Merge className="h-4 w-4" />
       </Button>
       <DropdownMenu>

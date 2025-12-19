@@ -6,14 +6,18 @@ export async function mergeTickets(sourceTicketId: number, targetTicketId: numbe
   if (!sourceTicketId || !targetTicketId) {
     throw new Error("sourceTicketId and targetTicketId are required");
   }
+  
+  if (sourceTicketId === targetTicketId) {
+    throw new Error("sourceTicketId and targetTicketId are equal");
+  }
 
   try {
     await zendeskClient.tickets.merge(targetTicketId, {
       ids: [sourceTicketId],
       source_comment_is_public: false,
       target_comment_is_public: false,
-      //source_comment: `Ticket has been merged in Ticket#${targetTicketId}.`,
-      //target_comment: `Ticket#${sourceTicketId} was merged in this ticket.`,
+      source_comment: `Ticket has been merged in Ticket#${targetTicketId}.`,
+      target_comment: `Ticket#${sourceTicketId} was merged in this ticket.`,
     });
 
     return {

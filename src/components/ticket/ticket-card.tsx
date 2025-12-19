@@ -6,21 +6,25 @@ import TicketButtonGroup from "./ticket-button-group";
 
 type TicketCardProps = {
   ticket: Ticket;
+  isActive: boolean;
   handleMerge: (ticketId: number) => Promise<{ success: boolean }>;
 };
 
-export default function TicketCard({ ticket, handleMerge }: TicketCardProps) {
+export default function TicketCard({ ticket, isActive, handleMerge }: TicketCardProps) {
   return (
-    <Card className="border-none p-3 px-0">
+    <Card className={isActive ? "bg-accent p-3 px-0" : "p-3 px-0"}>
       <CardHeader>
         <TicketTitle {...ticket} />
         <CardDescription className="flex items-start gap-1.5 text-sm">
           <StatusBadge {...ticket} />
           <div className="line-clamp-1 flex gap-2 font-medium">#{ticket.id}</div>
+          <div className="line-clamp-1 flex gap-2 font-medium">#{ticket.assignee_id}</div>
         </CardDescription>
-        <CardAction>
+        {ticket.status !== "closed" && !isActive && (
+          <CardAction>
           <TicketButtonGroup {...ticket} handleMerge={handleMerge} />
         </CardAction>
+        )}
       </CardHeader>
     </Card>
   );

@@ -1,21 +1,19 @@
 import type { ZAFClient } from "zafclient";
 
-declare global {
-  interface Window {
-    ZAFClient: {
-      init: () => ZAFClient;
-    };
-  }
-}
-
 let client: ZAFClient | null = null;
+let clientPromise: Promise<ZAFClient> | null = null;
 let sdkLoading: Promise<void> | null = null;
 
 function loadZafSdk(): Promise<void> {
   if (sdkLoading) return sdkLoading;
 
   sdkLoading = new Promise((resolve, reject) => {
-    if (window.ZAFClient) {
+    if (typeof window === "undefined") {
+      reject(new Error("ZAF SDK cannot load on the server"));
+      return;
+    }
+
+    if ((window as any).ZAFClient) {
       resolve();
       return;
     }
@@ -25,7 +23,7 @@ function loadZafSdk(): Promise<void> {
     script.async = true;
 
     script.onload = () => resolve();
-    script.onerror = reject;
+    script.onerror = () => reject(new Error("Failed to load Zendesk App Framework SDK"));
 
     document.body.appendChild(script);
   });
@@ -33,13 +31,30 @@ function loadZafSdk(): Promise<void> {
   return sdkLoading;
 }
 
-export async function getZafClient(): Promise<ZAFClient> {
-  if (client) return client;
+export function getZafClient(): Promise<ZAFClient> {
+  if (client) {
+    return Promise.resolve(client);
+  }
 
-  await loadZafSdk();
+  if (clientPromise) {
+    return clientPromise;
+  }
 
-  client = window.ZAFClient.init();
-  client.invoke("resize", { width: "100%", height: "400px" });
+  clientPromise = (async () => {
+    await loadZafSdk();
 
-  return client;
+    const ZAF = (window as any).ZAFClient;
+    if (!ZAF || typeof ZAF.init !== "function") {
+      throw new Error("ZAFClient SDK not available");
+    }
+
+    const instance = ZAF.init() as ZAFClient;
+
+    instance.invoke("resize", { width: "100%", height: "400px" });
+
+    client = instance;
+    return instance;
+  })();
+
+  return clientPromise;
 }

@@ -11,7 +11,7 @@ const STATUS_COLOR_MAP: Record<string, string> = {
   solved: "bg-gray-800",
 };
 
-const BASE_STYLES = "text-white text-xs capitalize font-normal font-semibold";
+const BASE_STYLES = "text-white capitalize font-normal";
 
 export default function StatusBadge({ status }: Ticket) {
   const bgColor = STATUS_COLOR_MAP[status || "closed"] || STATUS_COLOR_MAP.closed;

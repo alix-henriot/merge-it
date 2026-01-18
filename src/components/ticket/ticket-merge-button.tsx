@@ -2,7 +2,7 @@
 import { Button } from "../ui/button";
 import { Merge } from "lucide-react";
 import { Spinner } from "../ui/spinner";
-import { Status, Ticket } from "node-zendesk/clients/core/tickets";
+import { Status } from "node-zendesk/clients/core/tickets";
 import { toast } from "sonner";
 
 type TicketMergeProps = {
@@ -28,7 +28,7 @@ export default function TicketMergeButton({
     toast.promise(promise, {
       loading: "Merging ticket…",
       success: `Ticket #${id} merged successfully`,
-      error: (err: Error) => `Failed, ${err.message}`,
+      error: (err) => err.message ?? "Merge failed",
     });
   };
 

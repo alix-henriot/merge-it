@@ -1,31 +1,95 @@
-import { Card, CardAction, CardDescription, CardHeader } from "@/components/ui/card";
-import { Ticket } from "node-zendesk/clients/core/tickets";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import TicketTitle from "./ticket-title";
 import StatusBadge from "./status-badge";
-import TicketButtonGroup from "./ticket-button-group";
+import { TicketWithAssignee } from "~/types/zendesk";
+import TicketCopyButton from "./ticket-copy-button";
+import TicketMergeButton from "./ticket-merge-button";
+import { TicketComment } from "node-zendesk/clients/core/tickets";
+import { User } from "node-zendesk/clients/core/users";
+import { memo } from "react";
 
-type TicketCardProps = {
-  ticket: Ticket;
-  isActive: boolean;
-  handleMerge: (ticketId: number) => Promise<{ success: boolean }>;
-};
+interface Props {
+  ticket: TicketWithAssignee;
+  isActiveTicketClosed?: boolean;
+  comments: TicketComment[];
+  authors: Map<number, User>;
+  assignee?: User;
+  active?: boolean;
+  onHoverLoadComments: (ticketId: number) => void;
+  handleMerge: (ticketId: number) => Promise<void>;
+  onRedirect: (id: number) => Promise<void>;
+}
 
-export default function TicketCard({ ticket, isActive, handleMerge }: TicketCardProps) {
+function TicketCard({
+  ticket,
+  isActiveTicketClosed,
+  comments,
+  authors,
+  assignee,
+  active,
+  onHoverLoadComments,
+  handleMerge,
+  onRedirect,
+}: Props) {
+  console.log(ticket);
+  const createdAt = new Date(ticket.created_at);
+
+  const created_at = createdAt.toLocaleString(undefined, {
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false, // 24h clock
+  });
+
+  const disabled = !active && !isActiveTicketClosed && ticket.status !== "closed";
+
   return (
-    <Card className={isActive ? "bg-accent p-3 px-0" : "p-3 px-0"}>
-      <CardHeader>
-        <TicketTitle {...ticket} />
-        <CardDescription className="flex items-start gap-1.5 text-sm">
-          <StatusBadge {...ticket} />
-          <div className="line-clamp-1 flex gap-2 font-medium">#{ticket.id}</div>
-          <div className="line-clamp-1 flex gap-2 font-medium">#{ticket.assignee_id}</div>
-        </CardDescription>
-        {ticket.status !== "closed" && !isActive && (
-          <CardAction>
-          <TicketButtonGroup {...ticket} handleMerge={handleMerge} />
+    <Card
+      className={
+        active
+          ? "relative bg-accent text-accent-foreground border-none gap-0 py-3 shadow-none"
+          : "relative gap-0 py-3 shadow-none"
+      }
+    >
+      <CardHeader className="pl-4 pr-3 grid-rows-2 [.border-b]:pb-0">
+        <TicketTitle
+          id={ticket.id}
+          subject={ticket.subject!}
+          active={active}
+          comments={comments}
+          authors={authors}
+          onHoverLoadComments={onHoverLoadComments}
+          onRedirect={onRedirect}
+        />
+        <CardAction className="">
+          <TicketMergeButton
+            id={ticket.id}
+            status={ticket.status!}
+            isMerging={ticket.isMerging}
+            handleMerge={handleMerge}
+            disabled={!disabled}
+          />
         </CardAction>
-        )}
+        <div className="flex items-baseline gap-2 text-xs text-muted-foreground truncate">
+          <StatusBadge {...ticket} />
+          <span>{created_at}</span>
+          <span>{assignee?.name}</span>
+        </div>
+        <CardAction className="row-start-2">
+          <TicketCopyButton {...ticket} />
+        </CardAction>
       </CardHeader>
     </Card>
   );
 }
+
+export default memo(TicketCard);

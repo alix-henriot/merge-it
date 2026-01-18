@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/cn";
 import { Badge } from "@/components/ui/badge";
 import { Ticket } from "node-zendesk/clients/core/tickets";
 

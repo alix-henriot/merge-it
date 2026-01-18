@@ -1,7 +1,7 @@
 "use server";
 
-import { auth } from "@/auth";
-import { createClient } from "@/lib/zendesk";
+import { auth } from "@/lib/auth";
+import { client } from "./client";
 
 export async function mergeTickets(sourceTicketId: number, targetTicketId: number): Promise<void> {
   if (!Number.isInteger(sourceTicketId) || !Number.isInteger(targetTicketId)) {
@@ -14,14 +14,15 @@ export async function mergeTickets(sourceTicketId: number, targetTicketId: numbe
 
   const session = await auth();
 
-  if (!session?.zendeskAccessToken) {
+  if (!session) {
     throw new Error("Not authenticated with Zendesk");
   }
 
-  const client = createClient(session.zendeskAccessToken);
+  const zendesk = client(session);
 
   try {
-    await client.tickets.merge(targetTicketId, {
+    //⚠️ merge() response type to be updated in forked node zendesk!!
+    await zendesk.tickets.merge(targetTicketId, {
       ids: [sourceTicketId],
       source_comment_is_public: false,
       target_comment_is_public: false,
@@ -33,10 +34,6 @@ export async function mergeTickets(sourceTicketId: number, targetTicketId: numbe
       `Zendesk merge failed (source=${sourceTicketId}, target=${targetTicketId})`,
       error
     );
-
-    throw new Error(
-      error?.message ||
-        `Zendesk ticket merge failed (source=${sourceTicketId}, target=${targetTicketId})`
-    );
+    throw error;
   }
 }

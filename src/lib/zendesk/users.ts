@@ -1,8 +1,8 @@
 "use server";
 
-import { auth } from "@/auth";
-import { createClient } from "@/lib/zendesk";
+import { auth } from "@/lib/auth";
 import { User } from "node-zendesk/clients/core/users";
+import { client } from "./client";
 
 export async function getManyUsers(ids: number[]): Promise<User[]> {
   if (!ids) {
@@ -11,17 +11,17 @@ export async function getManyUsers(ids: number[]): Promise<User[]> {
 
   const session = await auth();
 
-  if (!session?.zendeskAccessToken) {
+  if (!session) {
     throw new Error("Not authenticated with Zendesk");
   }
 
-  const client = createClient(session.zendeskAccessToken);
+  const zendesk = client(session);
 
   try {
-    const response = await client.users.showMany(ids);
+    const response = await zendesk.users.showMany(ids);
     return response.result;
   } catch (error) {
     console.error("Zendesk error:", error);
-    throw new Error("Failed to fetch user");
+    throw error;
   }
 }

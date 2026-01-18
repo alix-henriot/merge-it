@@ -9,7 +9,7 @@
   "location": {
     "support": {
       "ticket_sidebar": {
-        "url": "http://localhost:3000/zendesk-sidebar",
+        "url": "https://jesse-unshredded-ada.ngrok-free.dev/zendesk/sidebar",
         "flexible": true
       }
     }

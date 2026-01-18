@@ -1,8 +1,8 @@
 import { useCallback, useRef, useState } from "react";
 import { TicketComment } from "node-zendesk/clients/core/tickets";
 import { User } from "node-zendesk/clients/core/users";
-import { getTicketComments } from "@/app/actions/zendesk/comments";
-import { getManyUsers } from "@/app/actions/zendesk/users";
+import { getTicketComments } from "@/lib/zendesk/comments";
+import { getManyUsers } from "@/lib/zendesk/users";
 
 export function useTicketCommentsCache() {
   const commentsCache = useRef<Record<number, TicketComment[]>>({});

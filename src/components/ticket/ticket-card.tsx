@@ -39,7 +39,6 @@ function TicketCard({
   handleMerge,
   onRedirect,
 }: Props) {
-  console.log(ticket);
   const createdAt = new Date(ticket.created_at);
 
   const created_at = createdAt.toLocaleString(undefined, {

@@ -91,7 +91,7 @@
   --popover: oklch(0.21 0.01 242.3);
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.26 0.01 248.33);
-  --primary-foreground: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.24 0.04 209.09); /*Requester comment color*/
   --secondary-foreground: oklch(0.89 0.01 0);
   --muted: oklch(0.269 0 0);

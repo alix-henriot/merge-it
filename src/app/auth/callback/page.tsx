@@ -24,7 +24,7 @@ export default function CallbackPage() {
     } else {
       window.location.href = "/";
     }
-  }, [error]);
+  }, [error, sendToParent]);
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen p-4">

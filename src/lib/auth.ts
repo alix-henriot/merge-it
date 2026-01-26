@@ -1,4 +1,4 @@
-import NextAuth, { NextAuthConfig } from "next-auth";
+import NextAuth from "next-auth";
 import type { OAuthConfig, OAuthUserConfig } from "next-auth/providers";
 
 interface ZendeskProfile extends Record<string, any> {
@@ -62,7 +62,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth(async (req) => {
   },
       async session({ session, token }) {
         session.accessToken = token.accessToken as string;
-        session.subdomain = subdomain as string; //WIP
+        session.subdomain = token.subdomain as string;
         return session;
       },
 

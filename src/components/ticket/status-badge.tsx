@@ -8,9 +8,9 @@ const badgeStatus = cva(
   {
     variants: {
       status: {
-        new: "bg-yellow-800",
-        open: "bg-red-800",
-        pending: "bg-blue-800",
+        new: "bg-warning",
+        open: "bg-danger",
+        pending: "bg-info",
         hold: "bg-blue-900",
         closed: "bg-gray-800",
         solved: "bg-gray-800",

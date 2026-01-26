@@ -4,6 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Check, Copy } from "lucide-react";
 import { Ticket } from "node-zendesk/clients/core/tickets";
 import { useState } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 export default function TicketCopyButton({ id }: Ticket) {
   const [copied, setCopied] = useState<boolean>(false);
@@ -20,6 +25,8 @@ export default function TicketCopyButton({ id }: Ticket) {
   };
 
   return (
+    <Tooltip>
+  <TooltipTrigger asChild>
     <Button
       size="xs"
       className="p-0 hover:bg-transparent"
@@ -31,5 +38,10 @@ export default function TicketCopyButton({ id }: Ticket) {
       #{id}
       {copied ? <Check className="size-2.5 text-green-500" /> : <Copy className="size-2.5" />}
     </Button>
+  </TooltipTrigger>
+  <TooltipContent>
+    {copied ? <p>Ticket ID copied<Check className="size-2.5 text-green-500" /></p> : <p>Copy Ticket ID</p>}
+  </TooltipContent>
+</Tooltip>
   );
 }

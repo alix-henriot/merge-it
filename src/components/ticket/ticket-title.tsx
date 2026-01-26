@@ -2,15 +2,18 @@ import { memo } from "react";
 import { CardTitle } from "../ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card";
 import { decodeHtmlEntities } from "@/utils/decode-html";
+import { formatDate } from "@/utils/format-date";
 import { isAgent } from "@/utils/is-agent";
 import type { TicketComment } from "node-zendesk/clients/core/tickets";
 import type { User } from "node-zendesk/clients/core/users";
 import { Spinner } from "../ui/spinner";
+import { CircleArrowDown, CircleArrowUp } from "lucide-react";
 
 interface Props {
   id: number;
   subject: string;
   active?: boolean;
+  satisfaction_rating?: { score?: string };
   comments: TicketComment[];
   authors: Map<number, User>;
   onHoverLoadComments: (ticketId: number) => void;
@@ -21,6 +24,7 @@ function TicketTitle({
   id,
   subject,
   active,
+  satisfaction_rating,
   comments,
   authors,
   onHoverLoadComments,
@@ -42,6 +46,8 @@ function TicketTitle({
           className="text-sm truncate font-medium hover:underline hover:cursor-pointer"
         >
           {subject}
+          {satisfaction_rating?.score === "good" && <CircleArrowUp className="mr-2 text-green-500"/>}
+          {satisfaction_rating?.score === "bad" && <CircleArrowDown className="mr-2 text-red-500"/>}
         </CardTitle>
       </HoverCardTrigger>
 
@@ -77,13 +83,7 @@ function TicketTitle({
                     </p>
 
                     <p className="mt-1 text-[10px] opacity-50 text-right">
-                      {new Date(comment.created_at).toLocaleString(undefined, {
-                        month: "short",
-                        day: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        hour12: false,
-                      })}
+                      {formatDate(comment.created_at)}
                     </p>
                   </div>
                 </div>

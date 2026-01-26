@@ -1,11 +1,7 @@
 import {
   Card,
   CardAction,
-  CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import TicketTitle from "./ticket-title";
 import StatusBadge from "./status-badge";
@@ -15,6 +11,7 @@ import TicketMergeButton from "./ticket-merge-button";
 import { TicketComment } from "node-zendesk/clients/core/tickets";
 import { User } from "node-zendesk/clients/core/users";
 import { memo } from "react";
+import { formatDate } from "@/utils/format-date";
 
 interface Props {
   ticket: TicketWithAssignee;
@@ -39,15 +36,6 @@ function TicketCard({
   handleMerge,
   onRedirect,
 }: Props) {
-  const createdAt = new Date(ticket.created_at);
-
-  const created_at = createdAt.toLocaleString(undefined, {
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false, // 24h clock
-  });
 
   const disabled = !active && !isActiveTicketClosed && ticket.status !== "closed";
 
@@ -76,11 +64,13 @@ function TicketCard({
             isMerging={ticket.isMerging}
             handleMerge={handleMerge}
             disabled={!disabled}
+            active={active}
+            isActiveTicketClosed={isActiveTicketClosed}
           />
         </CardAction>
         <div className="flex items-baseline gap-2 text-xs text-muted-foreground truncate">
           <StatusBadge {...ticket} />
-          <span>{created_at}</span>
+          <span>{formatDate(ticket.created_at)}</span>
           <span>{assignee?.name}</span>
         </div>
         <CardAction className="row-start-2">

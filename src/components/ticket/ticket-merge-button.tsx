@@ -20,6 +20,8 @@ type TicketMergeProps = {
   status: Status;
   isMerging?: boolean;
   disabled: boolean;
+  active?: boolean;
+  isActiveTicketClosed?: boolean;
   handleMerge: (ticketId: number) => Promise<void>;
 };
 
@@ -28,8 +30,14 @@ export default function TicketMergeButton({
   status,
   isMerging = false,
   disabled,
+  active = false,
+  isActiveTicketClosed = false,
   handleMerge,
 }: TicketMergeProps) {
+  const shouldHide =
+    status === "closed" || active || isActiveTicketClosed;
+  const isVisible = isMerging || !shouldHide;
+
   const onMerge = () => {
     if (isMerging) return;
 
@@ -42,6 +50,8 @@ export default function TicketMergeButton({
     });
   };
 
+  if (!isVisible) return null;
+
   return (
     
     <Drawer direction="top">
@@ -52,7 +62,7 @@ export default function TicketMergeButton({
       variant="outline"
       size="xs"
       aria-label="Merge ticket"
-      disabled={disabled || status === "closed"}
+      disabled={disabled || isMerging}
     >
       {isMerging ? <Spinner className="size-3.5" /> : <Merge className="size-3.5" />}
       Merge

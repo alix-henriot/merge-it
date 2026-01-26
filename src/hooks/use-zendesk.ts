@@ -10,7 +10,7 @@ export function useZendesk() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [subdomain, setSubdomain] = useState<string | null>(null);
   const [activeTicket, setActiveTicket] = useState<Ticket | null>(null);
-  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [tickets, setTickets] = useState<TicketWithAssignee[]>([]);
   const [assignees, setAssignees] = useState<User[]>([]);
 
   /** Initialize ZAF client */
@@ -84,6 +84,7 @@ export function useZendesk() {
         data: {
           sort_by: "created_at",
           sort_order: "desc",
+          //"page[size]": 4
         },
       })
       .then(({ tickets }) => {
@@ -97,7 +98,7 @@ export function useZendesk() {
     };
   }, [client, currentUser, activeTicket]);
 
-  /** Fetch tcikets assignees */
+  /** Fetch tickets assignees */
   useEffect(() => {
     if (!client || !tickets) return;
 

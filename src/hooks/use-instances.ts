@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useSessionStorage } from "usehooks-ts";
 import { TicketWithAssignee } from "~/types/zendesk";
-import { useZendesk } from "./zendesk-context";
+import { useZendesk } from "./use-zendesk";
 
 /**
  * This Hook allows to update simultaneously all instances of the app on Zendesk via session storage.

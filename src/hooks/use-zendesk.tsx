@@ -1,11 +1,31 @@
-import { useEffect, useState } from "react";
+"use client";
+
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
 import { ZAFClient } from "zafclient";
 import { User } from "node-zendesk/clients/core/users";
-import { getZafClient } from "@/lib/zaf-client";
 import { Ticket } from "node-zendesk/clients/core/tickets";
+import { getZafClient } from "@/lib/zaf-client";
 import { TicketWithAssignee } from "~/types/zendesk";
 
-export function useZendesk() {
+type ZendeskState = {
+  client: ZAFClient | null;
+  currentUser: User | null;
+  subdomain: string | null;
+  activeTicket: Ticket | null;
+  tickets: TicketWithAssignee[];
+  assignees: User[];
+  setTickets: React.Dispatch<React.SetStateAction<TicketWithAssignee[]>>;
+};
+
+const ZendeskContext = createContext<ZendeskState | null>(null);
+
+export function ZendeskProvider({ children }: { children: ReactNode }) {
   const [client, setClient] = useState<ZAFClient | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [subdomain, setSubdomain] = useState<string | null>(null);
@@ -13,27 +33,22 @@ export function useZendesk() {
   const [tickets, setTickets] = useState<TicketWithAssignee[]>([]);
   const [assignees, setAssignees] = useState<User[]>([]);
 
-  /** Initialize ZAF client */
   useEffect(() => {
     let mounted = true;
-
-    getZafClient().then((instance) => {
-      if (mounted) setClient(instance);
-    });
-
+    getZafClient().then((instance) => mounted && setClient(instance));
     return () => {
       mounted = false;
     };
   }, []);
 
-  /** Fetch current user */
   useEffect(() => {
     if (!client) return;
-
     let mounted = true;
 
     client.get(["currentUser"]).then(({ currentUser }) => {
-      if (mounted) setCurrentUser(currentUser as unknown as User);
+      if (mounted) {
+        setCurrentUser(currentUser as unknown as User);
+      }
     });
 
     return () => {
@@ -41,14 +56,15 @@ export function useZendesk() {
     };
   }, [client]);
 
-  /** Get active ticket */
+
   useEffect(() => {
     if (!client) return;
-
     let mounted = true;
 
     client.get(["ticket"]).then(({ ticket }) => {
-      if (mounted) setActiveTicket(ticket as unknown as Ticket);
+      if (mounted) {
+        setActiveTicket(ticket as unknown as Ticket);
+      }
     });
 
     return () => {
@@ -56,14 +72,14 @@ export function useZendesk() {
     };
   }, [client]);
 
-  /** Fetch account context */
   useEffect(() => {
     if (!client) return;
-
     let mounted = true;
 
     client.context().then(({ account }) => {
-      if (mounted) setSubdomain(account.subdomain);
+      if (mounted) {
+        setSubdomain(account.subdomain);
+      }
     });
 
     return () => {
@@ -71,20 +87,19 @@ export function useZendesk() {
     };
   }, [client]);
 
-  /** Fetch requester tickets */
+  /* ---------------- requester tickets ---------------- */
+
   useEffect(() => {
     if (!client || !currentUser || !activeTicket) return;
-
     let mounted = true;
 
     client
       .request({
-        url: `/api/v2/users/${(activeTicket.requester as Partial<User>)?.id}/tickets/requested.json`,
+        url: `/api/v2/users/${(activeTicket.requester as User)?.id}/tickets/requested.json`,
         type: "GET",
         data: {
           sort_by: "created_at",
           sort_order: "desc",
-          //"page[size]": 4
         },
       })
       .then(({ tickets }) => {
@@ -98,42 +113,59 @@ export function useZendesk() {
     };
   }, [client, currentUser, activeTicket]);
 
-  /** Fetch tickets assignees */
   useEffect(() => {
-    if (!client || !tickets) return;
-
+    if (!client || tickets.length === 0) return;
     let mounted = true;
 
     const ids = Array.from(
       new Set(
-        tickets.map((t) => t.assignee_id).filter((id): id is number => typeof id === "number")
+        tickets
+          .map((t) => t.assignee_id)
+          .filter((id): id is number => typeof id === "number")
       )
     );
 
+    if (!ids.length) return;
+
     client
       .request({
-        url: `/api/v2/users/show_many.json?ids=${ids}`,
+        url: `/api/v2/users/show_many.json?ids=${ids.join(",")}`,
         type: "GET",
-        //data: { ids },
       })
-      .then(({ users }) => {
-        if (mounted) {
-          setAssignees(users);
-        }
-      });
+      .then(({ users }) => mounted && setAssignees(users));
 
     return () => {
       mounted = false;
     };
   }, [client, tickets]);
 
-  return {
-    assignees,
+  /* ---------------- context value ---------------- */
+
+  const value: ZendeskState = {
     client,
     currentUser,
     subdomain,
-    tickets,
-    setTickets,
     activeTicket,
+    tickets,
+    assignees,
+    setTickets,
   };
+
+  return (
+    <ZendeskContext.Provider value={value}>
+      {children}
+    </ZendeskContext.Provider>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Hook */
+/* ------------------------------------------------------------------ */
+
+export function useZendesk() {
+  const ctx = useContext(ZendeskContext);
+  if (!ctx) {
+    throw new Error("useZendesk must be used inside ZendeskProvider");
+  }
+  return ctx;
 }

@@ -15,9 +15,13 @@
 - Add mergeTickets Error message granularity ✅
 - Messaging for auth status ✅
 - Refactor ZAFClient derivated Hooks into one useZendesk() 🕦
-- Add subdomain to session 
-- Improve plain html comment body
+- Add confirmation drawer on Merge ✅
+- Add subdomain to session ✅
+- Improve plain html comment body ✅
 - Use moment for dates
 - Improve authenticated API routes
-- Post messages to all iframes to update tickets array
-- Add Tooltip for Copy button
+- Post messages to all iframes to update tickets array ✅
+- Add Tooltip for Copy button ✅
+- Add tag option on merge ?
+- Add satisfaction ✅
+- Write tests 🕦

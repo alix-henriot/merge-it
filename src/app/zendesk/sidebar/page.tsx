@@ -4,14 +4,14 @@ import TicketCard from "@/components/ticket/ticket-card";
 import { mergeTickets } from "@/lib/zendesk/merge";
 import TicketCardSkeleton from "@/components/ticket/ticket-card-skeleton";
 import { useTicketCommentsCache } from "@/hooks/use-ticket-comments-cache";
-import { useZendesk } from "@/hooks/zendesk-context";
 import { Suspense } from "react";
 import { Ticket } from "node-zendesk/clients/core/tickets";
 import { useInstances } from "@/hooks/use-instances";
 import { Button } from "@/components/ui/button";
 import { createTicket } from "@/lib/zendesk/tickets";
+import { useZendesk } from "@/hooks/use-zendesk";
 
-export default function SidebarPage() {
+export default function Page() {
 
   const { client, currentUser, assignees, tickets, activeTicket, setTickets } = useZendesk();
 

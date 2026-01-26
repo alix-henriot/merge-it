@@ -14,7 +14,6 @@ export async function POST(request: NextRequest) {
     }
 
     const cookieStore = await cookies();
-    const isProd = process.env.NODE_ENV === "production";
 
     cookieStore.set("subdomain", subdomain, {
       httpOnly: true,
@@ -23,8 +22,6 @@ export async function POST(request: NextRequest) {
       path: "/",
       maxAge: 60 * 60,
     });
-
-    console.log("Cookie set");
 
     return NextResponse.json({
       success: true,

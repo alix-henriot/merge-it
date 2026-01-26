@@ -47,7 +47,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth(async (req) => {
   return {
     providers: [Zendesk({ subdomain })],
     pages: {
-      signIn: "auth/signed-out",
+      signIn: "zendesk/auth",
     },
     callbacks: {
       async jwt({ token, account }) {

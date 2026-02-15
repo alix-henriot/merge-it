@@ -55,7 +55,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth(async (req) => {
         const subdomain = req.cookies.get("subdomain")?.value;
 
         token.accessToken = account.access_token;
-        token.subdomain = subdomain; //WIP
+        token.subdomain = subdomain;
       }
 
     return token;

@@ -13,7 +13,7 @@ function loadZafSdk(): Promise<void> {
       return;
     }
 
-    if ((window as any).ZAFClient) {
+    if ((window as Window).ZAFClient) {
       resolve();
       return;
     }
@@ -43,7 +43,7 @@ export function getZafClient(): Promise<ZAFClient> {
   clientPromise = (async () => {
     await loadZafSdk();
 
-    const ZAF = (window as any).ZAFClient;
+    const ZAF = (window as Window).ZAFClient;
     if (!ZAF || typeof ZAF.init !== "function") {
       throw new Error("ZAFClient SDK not available");
     }

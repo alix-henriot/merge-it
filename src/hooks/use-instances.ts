@@ -1,10 +1,11 @@
+"use client";
 import { useEffect } from "react";
 import { useSessionStorage } from "usehooks-ts";
 import { TicketWithAssignee } from "~/types/zendesk";
 import { useZendesk } from "./use-zendesk";
 
 /**
- * This Hook allows to update simultaneously all instances of the app on Zendesk via session storage.
+ * This Hook updates simultaneously all instances of the app from other iframes via session storage.
  */
 
 type TicketUpdate = {
@@ -18,7 +19,6 @@ export function useInstances() {
 
   const { setTickets } = useZendesk();
 
-  // React to updates coming from OTHER iframes
   useEffect(() => {
     if (!updateTicket) return;
 

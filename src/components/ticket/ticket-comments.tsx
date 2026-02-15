@@ -14,6 +14,7 @@ export default function TicketComments({
     comments,
     authors
 }: Props) {
+    // Should handle comment.type === "Voice Comment"
 
     return (
         <div className="space-y-2">
@@ -26,20 +27,20 @@ export default function TicketComments({
 
               const bubbleClass = comment.public
                 ? agent
-                  ? "bg-muted text-public-foreground"
+                  ? "bg-muted text-muted-foreground"
                   : "bg-public text-public-foreground"
-                : "border border-internal-ring bg-internal text-foreground";
+                : "border border-internal-ring bg-internal text-muted-foreground";
 
               return (
                 <div key={comment.id} className={`flex ${agent ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-9/10 rounded-md px-3 py-2 text-xs ${bubbleClass}`}>
+                  <div className={`max-w-9/10 rounded-md px-3 py-2 text-xs ${bubbleClass} text-wrap`}>
                     <p className="mb-1 text-[11px] font-medium opacity-70">
                       {author?.name ?? "Unknown"}
                       {!comment.public && " · Internal note"}
                     </p>
 
-                    <p className="whitespace-pre-wrap text-sm leading-relaxed">
-                      {decodeHtmlEntities(comment.plain_body)}
+                    <p className="text-sm">
+                      {comment.body}
                     </p>
 
                     <p className="mt-1 text-[10px] opacity-50 text-right">

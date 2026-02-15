@@ -18,8 +18,21 @@ export async function getTicketComments(id: number): Promise<TicketComment[]> {
 
   try {
     return await zendesk.tickets.getComments(id);
-  } catch (error) {
-    console.error("Zendesk error:", error);
-    throw error;
+    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    const message: string = error?.message ?? "";
+
+    if (message.includes("Zendesk Error (401)")) {
+      throw new Error("Invalid Zendesk Credentials");
+    }
+
+    if (message.includes("Zendesk Error (404)")) {
+      throw new Error("Ticket not found");
+    }
+  
+  // Missing coverage ⬇
+  console.error("Unexpected Zendesk failure", error);
+  throw new Error("Merge failed due to a system error");
   }
 }

@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Ticket } from "node-zendesk/clients/core/tickets";
 
 const badgeStatus = cva(
-  "text-white capitalize font-normal",
+  "text-background capitalize font-semibold",
   {
     variants: {
       status: {
@@ -12,8 +12,8 @@ const badgeStatus = cva(
         open: "bg-danger",
         pending: "bg-info",
         hold: "bg-blue-900",
-        closed: "bg-gray-800",
-        solved: "bg-gray-800",
+        closed: "bg-foreground",
+        solved: "bg-foreground",
       },
     },
   }

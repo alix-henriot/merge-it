@@ -5,15 +5,16 @@ import { Spinner } from "../ui/spinner";
 import { Status } from "node-zendesk/clients/core/tickets";
 import { toast } from "sonner";
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer"
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Kbd } from "../ui/kbd";
+import { MergeTicketsResult } from "@/lib/zendesk/merge";
 
 type TicketMergeProps = {
   id: number;
@@ -22,7 +23,7 @@ type TicketMergeProps = {
   disabled: boolean;
   active?: boolean;
   isActiveTicketClosed?: boolean;
-  handleMerge: (ticketId: number) => Promise<void>;
+  handleMerge: (ticketId: number) => Promise<MergeTicketsResult>;
 };
 
 export default function TicketMergeButton({
@@ -45,7 +46,7 @@ export default function TicketMergeButton({
 
     toast.promise(promise, {
       loading: "Merging ticket…",
-      success: `Ticket #${id} merged successfully`,
+      success: (result) => `Ticket #${result.mergedFrom} merged into #${result.mergedInto}`,
       error: (err) => err.message ?? "Merge failed",
     });
   };
@@ -54,12 +55,12 @@ export default function TicketMergeButton({
 
   return (
     
-    <Drawer direction="top">
-  <DrawerTrigger
+    <Dialog>
+  <DialogTrigger
   asChild
   >
     <Button
-      variant="outline"
+      variant="default"
       size="xs"
       aria-label="Merge ticket"
       disabled={disabled || isMerging}
@@ -67,19 +68,16 @@ export default function TicketMergeButton({
       {isMerging ? <Spinner className="size-3.5" /> : <Merge className="size-3.5" />}
       Merge
     </Button>
-  </DrawerTrigger>
-  <DrawerContent>
-    <DrawerHeader>
-      <DrawerTitle>Confirm  merge?</DrawerTitle>
-      <DrawerDescription>This action cannot be undone.</DrawerDescription>
-    </DrawerHeader>
-    <DrawerFooter>
-      <Button variant="outline" onClick={onMerge}>Merge</Button>
-      <DrawerClose asChild>
-        <Button variant="ghost">Cancel</Button>
-      </DrawerClose>
-    </DrawerFooter>
-  </DrawerContent>
-</Drawer>
+  </DialogTrigger>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Confirm  merge?</DialogTitle>
+      <DialogDescription>Press <Kbd>esc</Kbd> to cancel.</DialogDescription>
+    </DialogHeader>
+    <DialogFooter>
+      <Button onClick={onMerge}>Merge <Kbd>M</Kbd></Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
   );
 }

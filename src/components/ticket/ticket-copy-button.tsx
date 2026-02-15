@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Check, Copy } from "lucide-react";
+import { Copy } from "lucide-react";
 import { Ticket } from "node-zendesk/clients/core/tickets";
 import { useState } from "react";
 import {
@@ -18,7 +18,7 @@ export default function TicketCopyButton({ id }: Ticket) {
       await navigator.clipboard.writeText(String(id));
       setCopied(true);
 
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), 500);
     } catch (err) {
       console.error("Failed to copy ticket ID", err);
     }
@@ -29,18 +29,18 @@ export default function TicketCopyButton({ id }: Ticket) {
   <TooltipTrigger asChild>
     <Button
       size="xs"
-      className="p-0 hover:bg-transparent"
+      className="p-0"
       aria-label={`Copy ticket #${id}`}
       variant="ghost"
       onClick={handleCopy}
       disabled={copied}
     >
-      #{id}
-      {copied ? <Check className="size-2.5 text-green-500" /> : <Copy className="size-2.5" />}
+      { copied ? "Copied" : `#${id}`}
+      <Copy className="size-2.5" />
     </Button>
   </TooltipTrigger>
   <TooltipContent>
-    {copied ? <p>Ticket ID copied<Check className="size-2.5 text-green-500" /></p> : <p>Copy Ticket ID</p>}
+    Copy #{id}
   </TooltipContent>
 </Tooltip>
   );

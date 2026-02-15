@@ -60,8 +60,7 @@ export default function AuthSidebarPage() {
     const left = window.screenX + (window.outerWidth - width) / 2;
     const top = window.screenY + (window.outerHeight - height) / 2;
 
-    const callbackUrl = encodeURIComponent(`${window.location.origin}/auth/callback`);
-    const authUrl = `/auth/sign-in?callbackUrl=${callbackUrl}`;
+    const authUrl = `/auth/sign-in`;
 
     const popup = window.open(
       authUrl,

@@ -1,3 +1,4 @@
+"use client";
 import { useCallback, useRef, useState } from "react";
 import { TicketComment } from "node-zendesk/clients/core/tickets";
 import { User } from "node-zendesk/clients/core/users";

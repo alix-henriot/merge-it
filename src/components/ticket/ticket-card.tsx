@@ -12,6 +12,7 @@ import { TicketComment } from "node-zendesk/clients/core/tickets";
 import { User } from "node-zendesk/clients/core/users";
 import { memo } from "react";
 import { formatDate } from "@/utils/format-date";
+import { MergeTicketsResult } from "@/lib/zendesk/merge";
 
 interface Props {
   ticket: TicketWithAssignee;
@@ -21,7 +22,7 @@ interface Props {
   assignee?: User;
   active?: boolean;
   onHoverLoadComments: (ticketId: number) => void;
-  handleMerge: (ticketId: number) => Promise<void>;
+  handleMerge: (ticketId: number) => Promise<MergeTicketsResult>;
   onRedirect: (id: number) => Promise<void>;
 }
 
@@ -43,8 +44,8 @@ function TicketCard({
     <Card
       className={
         active
-          ? "relative bg-accent text-accent-foreground border-none gap-0 py-3 shadow-none"
-          : "relative gap-0 py-3 shadow-none"
+          ? "relative bg-primary text-primary-foreground gap-0 py-2.5 shadow-md"
+          : "relative gap-0 py-2.5 shadow-none"
       }
     >
       <CardHeader className="pl-4 pr-3 grid-rows-2 [.border-b]:pb-0">
@@ -68,7 +69,7 @@ function TicketCard({
             isActiveTicketClosed={isActiveTicketClosed}
           />
         </CardAction>
-        <div className="flex items-baseline gap-2 text-xs text-muted-foreground truncate">
+        <div className="flex items-baseline gap-2 text-xs truncate">
           <StatusBadge {...ticket} />
           <span>{formatDate(ticket.created_at)}</span>
           <span>{assignee?.name}</span>

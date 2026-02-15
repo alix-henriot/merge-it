@@ -1,12 +1,8 @@
 import { memo } from "react";
 import { CardTitle } from "../ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card";
-import { decodeHtmlEntities } from "@/utils/decode-html";
-import { formatDate } from "@/utils/format-date";
-import { isAgent } from "@/utils/is-agent";
 import type { TicketComment } from "node-zendesk/clients/core/tickets";
 import type { User } from "node-zendesk/clients/core/users";
-import { Spinner } from "../ui/spinner";
 import { CircleArrowDown, CircleArrowUp } from "lucide-react";
 import TicketComments from "./ticket-comments";
 

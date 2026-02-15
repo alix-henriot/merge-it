@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import useMessage from "@rottitime/react-hook-message-event";
-import { CircleX } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 
 export default function CallbackPage() {
@@ -27,8 +26,8 @@ export default function CallbackPage() {
   }, [error, sendToParent]);
 
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen p-4">
-      {error ? <CircleX className="text-red-600" /> : <Spinner />}
-    </div>
+    <Suspense fallback={"Could not read Search Paramters"}>
+      {error ? "Did not work out" : <Spinner/>}
+    </Suspense>
   );
 }

@@ -19,8 +19,10 @@ type ZendeskState = {
   subdomain: string | null;
   activeTicket: Ticket | null;
   tickets: TicketWithAssignee[];
+  nextPage: string | null;
   assignees: User[];
   setTickets: React.Dispatch<React.SetStateAction<TicketWithAssignee[]>>;
+  getNextPage: () => void;
 };
 
 const ZendeskContext = createContext<ZendeskState | null>(null);
@@ -32,6 +34,7 @@ export function ZendeskProvider({ children }: { children: ReactNode }) {
   const [activeTicket, setActiveTicket] = useState<Ticket | null>(null);
   const [tickets, setTickets] = useState<TicketWithAssignee[]>([]);
   const [assignees, setAssignees] = useState<User[]>([]);
+  const [nextPage, setNextPage] = useState<string | null>(null)
 
   useEffect(() => {
     let mounted = true;
@@ -100,11 +103,15 @@ export function ZendeskProvider({ children }: { children: ReactNode }) {
         data: {
           sort_by: "created_at",
           sort_order: "desc",
+          per_page: 4
+          //"page[size]": 4
         },
       })
-      .then(({ tickets }) => {
+      .then(({ tickets, next_page }) => {
         if (mounted) {
           setTickets(tickets);
+          console.log("next_page: ", next_page)
+          setNextPage(next_page)
         }
       });
 
@@ -112,6 +119,30 @@ export function ZendeskProvider({ children }: { children: ReactNode }) {
       mounted = false;
     };
   }, [client, currentUser, activeTicket]);
+
+  useEffect(() => {
+    console.log(tickets)
+  }, [tickets])
+
+  function getNextPage(){
+    if (!client || !nextPage || !activeTicket) return;
+    
+    client
+      .request({
+        url: nextPage,
+        type: "GET",
+        data: {
+          sort_by: "created_at",
+          sort_order: "desc",
+          per_page: 4
+        },
+      })
+      .then(({ tickets, next_page }) => {
+          setTickets(prev => [...prev, ...tickets]);
+          setNextPage(next_page)
+      });
+
+  }
 
   useEffect(() => {
     if (!client || tickets.length === 0) return;
@@ -147,6 +178,8 @@ export function ZendeskProvider({ children }: { children: ReactNode }) {
     subdomain,
     activeTicket,
     tickets,
+    nextPage,
+    getNextPage,
     assignees,
     setTickets,
   };

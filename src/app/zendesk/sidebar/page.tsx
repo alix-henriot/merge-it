@@ -13,7 +13,7 @@ import { useZendesk } from "@/hooks/use-zendesk";
 
 export default function Page() {
 
-  const { client, currentUser, assignees, tickets, activeTicket, setTickets } = useZendesk();
+  const { client, currentUser, assignees, tickets, activeTicket, setTickets, nextPage, getNextPage } = useZendesk();
 
   const { setUpdateTicket } = useInstances();
 
@@ -42,17 +42,17 @@ export default function Page() {
     );
 
     try {
-      const { ["ticket.id"]: activeId } = await client.get(["ticket.id"]);
-      await mergeTickets(sourceTicketId, Number(activeId));
+      const response = await mergeTickets({sourceTicketId, targetTicketId: activeTicket?.id as string | number});
       invalidate(sourceTicketId);
       setUpdateTicket({
-        id: sourceTicketId,
+        id: response.mergedFrom,
         data: {
           isMerging: false,
           status: "closed",
           assignee: currentUser,
         },
-      });   
+      });
+      return response;
     } catch (error) {
       if (previous) {
         setTickets((prev) => prev.map((t) => (t.id === sourceTicketId ? previous! : t)));
@@ -79,9 +79,9 @@ export default function Page() {
   const assigneeMap = new Map(assignees.map((u) => [u.id, u]));
 
   return (
-    <div className="w-full flex flex-col space-y-2 bg-background overflow-y-auto">
+    <div className="w-full flex flex-col p-1.5 space-y-2 bg-background overflow-y-auto">
       {
-        process.env.NODE_ENV === "development" && (
+        process.env.NODE_ENV === "production" && (
           <Button variant="outline" onClick={handleCreateTicket}>Create ticket</Button>
         )
       }
@@ -100,6 +100,9 @@ export default function Page() {
             assignee={ticket.assignee_id ? assigneeMap.get(ticket.assignee_id) : undefined}
           />
         ))}
+        {nextPage &&
+          <Button onClick={getNextPage} variant="secondary">See more</Button>
+        }
       </Suspense>
     </div>
   );

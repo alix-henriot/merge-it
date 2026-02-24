@@ -1,11 +1,11 @@
 import "next-auth";
 
 declare module "next-auth" {
-  interface ZendeskProfile  {
-  id: number;
-  name: string;
-  email: string;
-}
+  interface ZendeskProfile extends Record<string, any> {
+    id: number;
+    name: string;
+    email: string;
+  }
   interface Session {
     accessToken: string;
     subdomain: string;
@@ -13,7 +13,7 @@ declare module "next-auth" {
   }
 
   interface Account extends Account {
-    access_token: string
+    access_token: string;
   }
 }
 

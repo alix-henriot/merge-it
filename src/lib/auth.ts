@@ -1,11 +1,7 @@
 import NextAuth from "next-auth";
+import { ZendeskProfile } from "next-auth";
 import type { OAuthConfig, OAuthUserConfig } from "next-auth/providers";
 
-interface ZendeskProfile extends Record<string, any> {
-  id: number;
-  name: string;
-  email: string;
-}
 
 export default function Zendesk<P extends ZendeskProfile>(
   config: OAuthUserConfig<ZendeskProfile> & {
@@ -51,15 +47,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth(async (req) => {
     },
     callbacks: {
       async jwt({ token, account }) {
-      if (account && req) {
-        const subdomain = req.cookies.get("subdomain")?.value;
+        if (account && req) {
+          const subdomain = req.cookies.get("subdomain")?.value;
 
-        token.accessToken = account.access_token;
-        token.subdomain = subdomain;
-      }
+          token.accessToken = account.access_token;
+          token.subdomain = subdomain;
+        }
 
-    return token;
-  },
+        return token;
+      },
       async session({ session, token }) {
         session.accessToken = token.accessToken as string;
         session.subdomain = token.subdomain as string;

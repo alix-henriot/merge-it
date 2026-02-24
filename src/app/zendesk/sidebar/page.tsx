@@ -2,25 +2,65 @@
 
 import TicketCard from "@/components/ticket/ticket-card";
 import { mergeTickets } from "@/lib/zendesk/merge";
-import TicketCardSkeleton from "@/components/ticket/ticket-card-skeleton";
 import { useTicketCommentsCache } from "@/hooks/use-ticket-comments-cache";
-import { Suspense } from "react";
+import { useEffect, useRef } from "react";
 import { Ticket } from "node-zendesk/clients/core/tickets";
 import { useInstances } from "@/hooks/use-instances";
 import { Button } from "@/components/ui/button";
-import { createTicket } from "@/lib/zendesk/tickets";
 import { useZendesk } from "@/hooks/use-zendesk";
+import LogoLoader from "@/components/logo-loader";
+import { TicketMergeFormValues } from "@/components/ticket/ticket-merge-form";
+import { toast } from "sonner";
 
 export default function Page() {
-
-  const { client, currentUser, assignees, tickets, activeTicket, setTickets, nextPage, getNextPage } = useZendesk();
-
-  const { setUpdateTicket } = useInstances();
+  const {
+    client,
+    currentUser,
+    assignees,
+    tickets,
+    activeTicket,
+    resizeToContent,
+    setTickets,
+    nextPage,
+    getNextPage,
+  } = useZendesk();
+  const { spreadTicketUpdate } = useInstances();
 
   const { commentsByTicket, authorsByTicket, loadIfNeeded, invalidate } = useTicketCommentsCache();
+  const containerRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const id = requestAnimationFrame(() => {
+      resizeToContent(containerRef.current);
+    });
 
-  const handleMerge = async (sourceTicketId: number) => {
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const observer = new ResizeObserver(() => {
+      resizeToContent(containerRef.current);
+    });
+
+    observer.observe(containerRef.current);
+
+    return () => observer.disconnect();
+  }, [resizeToContent]);
+
+  /* useEffect(() => {
+    if (tickets.length === 0) return;
+
+    setTickets((prev) =>
+      prev.map((t) => ({
+        ...t,
+        satisfaction_rating: { score: "good" }
+      }))
+    );
+  }, [tickets, setTickets]) */
+
+  const handleMerge = async (sourceId: number, targetId: number, values: TicketMergeFormValues) => {
     if (!client || !currentUser) {
       throw new Error("Client not ready");
     }
@@ -29,7 +69,7 @@ export default function Page() {
 
     setTickets((prev) =>
       prev.map((t) => {
-        if (t.id !== sourceTicketId) return t;
+        if (t.id !== sourceId) return t;
 
         previous = t;
         return {
@@ -42,24 +82,29 @@ export default function Page() {
     );
 
     try {
-      const response = await mergeTickets({sourceTicketId, targetTicketId: activeTicket?.id as string | number});
-      invalidate(sourceTicketId);
-      setUpdateTicket({
-        id: response.mergedFrom,
+      const response = toast.promise(mergeTickets({ sourceId, targetId: targetId, ...values }), {
+        loading: "Merging ticket…",
+        success: (result) => `Ticket #${result.mergedFrom} merged into #${result.mergedInto}`,
+        error: (err) => err.message ?? "Merge failed",
+      });
+      const result = await response.unwrap();
+      invalidate(sourceId);
+      spreadTicketUpdate({
+        id: result.mergedFrom,
         data: {
           isMerging: false,
           status: "closed",
           assignee: currentUser,
         },
       });
-      return response;
+      return result;
     } catch (error) {
       if (previous) {
-        setTickets((prev) => prev.map((t) => (t.id === sourceTicketId ? previous! : t)));
+        setTickets((prev) => prev.map((t) => (t.id === sourceId ? previous! : t)));
       }
 
       throw error;
-    };
+    }
   };
 
   const handleRedirect: (id: number) => Promise<void> = async (id: number) =>
@@ -67,43 +112,38 @@ export default function Page() {
 
   const isActiveTicketClosed = activeTicket?.status === "closed";
 
-  const handleCreateTicket = async () => {
-    
-    try {
-      await createTicket()
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
   const assigneeMap = new Map(assignees.map((u) => [u.id, u]));
 
   return (
-    <div className="w-full flex flex-col p-1.5 space-y-2 bg-background overflow-y-auto">
-      {
-        process.env.NODE_ENV === "production" && (
-          <Button variant="outline" onClick={handleCreateTicket}>Create ticket</Button>
-        )
-      }
-      <Suspense fallback={<TicketCardSkeleton />}>
-        {tickets.map((ticket) => (
-          <TicketCard
-            key={ticket.id}
-            ticket={ticket}
-            active={ticket.id === activeTicket?.id}
-            isActiveTicketClosed={isActiveTicketClosed}
-            handleMerge={handleMerge}
-            onRedirect={handleRedirect}
-            comments={commentsByTicket[ticket.id] ?? []}
-            authors={authorsByTicket[ticket.id] ?? new Map()}
-            onHoverLoadComments={loadIfNeeded}
-            assignee={ticket.assignee_id ? assigneeMap.get(ticket.assignee_id) : undefined}
-          />
-        ))}
-        {nextPage &&
-          <Button onClick={getNextPage} variant="secondary">See more</Button>
-        }
-      </Suspense>
+    <div
+      ref={containerRef}
+      className="w-full flex flex-col p-1.5 space-y-2 bg-background max-h-[450] overflow-y-auto"
+    >
+      {tickets.length === 0 ? (
+        <LogoLoader className="mx-auto w-24 text-primary" />
+      ) : (
+        <>
+          {tickets.map((ticket) => (
+            <TicketCard
+              key={ticket.id}
+              ticket={ticket}
+              active={activeTicket!}
+              isActiveTicketClosed={isActiveTicketClosed}
+              handleMerge={handleMerge}
+              onRedirect={handleRedirect}
+              comments={commentsByTicket[ticket.id] ?? []}
+              authors={authorsByTicket[ticket.id] ?? new Map()}
+              loadComments={loadIfNeeded}
+              assignee={ticket.assignee_id ? assigneeMap.get(ticket.assignee_id) : undefined}
+            />
+          ))}
+          {nextPage && (
+            <Button onClick={getNextPage} variant="secondary">
+              See more
+            </Button>
+          )}
+        </>
+      )}
     </div>
   );
 }

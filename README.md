@@ -1,6 +1,6 @@
 # Merge It
 
-Merge it is a server-side Zendesk app providing a modern Ticket history. It lives in the Ticket's view sidebar and uses Zendesk App Framework Client from the Window as well as a dedicated Client from the server side.
+Merge it is a server-side Zendesk app providing a modern Ticket history. It lives in the Ticket's view sidebar and uses Zendesk App Framework Client from the Window as well as a dedicated Oauth Client from the server side.
 
 ### TO DO LIST
 

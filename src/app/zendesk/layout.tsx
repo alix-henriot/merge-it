@@ -1,13 +1,13 @@
 "use client";
 
 import { ZendeskProvider } from "@/hooks/use-zendesk";
+import { ZendeskInitializer } from "@/lib/zendesk-initalizer";
 
-export default function layout({children}: {
-    children: React.ReactNode
-}) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <ZendeskProvider>
-        {children}
+      <ZendeskInitializer />
+      {children}
     </ZendeskProvider>
-  )
+  );
 }

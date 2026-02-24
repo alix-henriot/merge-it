@@ -14,8 +14,10 @@ type TicketUpdate = {
 };
 
 export function useInstances() {
-  const [updateTicket, setUpdateTicket] =
-    useSessionStorage<TicketUpdate | null>("ticket-update", null);
+  const [updateTicket, setUpdateTicket] = useSessionStorage<TicketUpdate | null>(
+    "ticket-update",
+    null
+  );
 
   const { setTickets } = useZendesk();
 
@@ -37,6 +39,6 @@ export function useInstances() {
   }, [updateTicket, setTickets]);
 
   return {
-    setUpdateTicket,
+    spreadTicketUpdate: setUpdateTicket,
   };
 }

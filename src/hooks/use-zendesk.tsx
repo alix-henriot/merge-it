@@ -1,20 +1,14 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  ReactNode,
-} from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { ZAFClient } from "zafclient";
 import { User } from "node-zendesk/clients/core/users";
 import { Ticket } from "node-zendesk/clients/core/tickets";
-import { getZafClient } from "@/lib/zaf-client";
 import { TicketWithAssignee } from "~/types/zendesk";
 
 type ZendeskState = {
   client: ZAFClient | null;
+  setClient: React.Dispatch<React.SetStateAction<ZAFClient | null>>;
   currentUser: User | null;
   subdomain: string | null;
   activeTicket: Ticket | null;
@@ -23,6 +17,7 @@ type ZendeskState = {
   assignees: User[];
   setTickets: React.Dispatch<React.SetStateAction<TicketWithAssignee[]>>;
   getNextPage: () => void;
+  resizeToContent: (el?: HTMLElement | null) => void;
 };
 
 const ZendeskContext = createContext<ZendeskState | null>(null);
@@ -34,15 +29,18 @@ export function ZendeskProvider({ children }: { children: ReactNode }) {
   const [activeTicket, setActiveTicket] = useState<Ticket | null>(null);
   const [tickets, setTickets] = useState<TicketWithAssignee[]>([]);
   const [assignees, setAssignees] = useState<User[]>([]);
-  const [nextPage, setNextPage] = useState<string | null>(null)
+  const [nextPage, setNextPage] = useState<string | null>(null);
 
-  useEffect(() => {
-    let mounted = true;
-    getZafClient().then((instance) => mounted && setClient(instance));
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const resizeToContent = (el?: HTMLElement | null) => {
+    if (!client || !el) return;
+
+    const height = el.clientHeight;
+
+    client.invoke("resize", {
+      width: "100%",
+      height: `${height}px`,
+    });
+  };
 
   useEffect(() => {
     if (!client) return;
@@ -58,7 +56,6 @@ export function ZendeskProvider({ children }: { children: ReactNode }) {
       mounted = false;
     };
   }, [client]);
-
 
   useEffect(() => {
     if (!client) return;
@@ -103,15 +100,13 @@ export function ZendeskProvider({ children }: { children: ReactNode }) {
         data: {
           sort_by: "created_at",
           sort_order: "desc",
-          per_page: 4
-          //"page[size]": 4
+          per_page: 4,
         },
       })
       .then(({ tickets, next_page }) => {
         if (mounted) {
           setTickets(tickets);
-          console.log("next_page: ", next_page)
-          setNextPage(next_page)
+          setNextPage(next_page);
         }
       });
 
@@ -120,13 +115,9 @@ export function ZendeskProvider({ children }: { children: ReactNode }) {
     };
   }, [client, currentUser, activeTicket]);
 
-  useEffect(() => {
-    console.log(tickets)
-  }, [tickets])
-
-  function getNextPage(){
+  function getNextPage() {
     if (!client || !nextPage || !activeTicket) return;
-    
+
     client
       .request({
         url: nextPage,
@@ -134,14 +125,13 @@ export function ZendeskProvider({ children }: { children: ReactNode }) {
         data: {
           sort_by: "created_at",
           sort_order: "desc",
-          per_page: 4
+          per_page: 4,
         },
       })
       .then(({ tickets, next_page }) => {
-          setTickets(prev => [...prev, ...tickets]);
-          setNextPage(next_page)
+        setTickets((prev) => [...prev, ...tickets]);
+        setNextPage(next_page);
       });
-
   }
 
   useEffect(() => {
@@ -150,9 +140,7 @@ export function ZendeskProvider({ children }: { children: ReactNode }) {
 
     const ids = Array.from(
       new Set(
-        tickets
-          .map((t) => t.assignee_id)
-          .filter((id): id is number => typeof id === "number")
+        tickets.map((t) => t.assignee_id).filter((id): id is number => typeof id === "number")
       )
     );
 
@@ -174,6 +162,7 @@ export function ZendeskProvider({ children }: { children: ReactNode }) {
 
   const value: ZendeskState = {
     client,
+    setClient,
     currentUser,
     subdomain,
     activeTicket,
@@ -182,13 +171,10 @@ export function ZendeskProvider({ children }: { children: ReactNode }) {
     getNextPage,
     assignees,
     setTickets,
+    resizeToContent,
   };
 
-  return (
-    <ZendeskContext.Provider value={value}>
-      {children}
-    </ZendeskContext.Provider>
-  );
+  return <ZendeskContext.Provider value={value}>{children}</ZendeskContext.Provider>;
 }
 
 /* ------------------------------------------------------------------ */

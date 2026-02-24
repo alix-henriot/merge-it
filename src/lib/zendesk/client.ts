@@ -8,4 +8,4 @@ export const client = (session: Session) => {
     oauth: true,
     username: session.user.email,
   });
-}
+};

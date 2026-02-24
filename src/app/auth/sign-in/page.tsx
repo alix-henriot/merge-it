@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import LogoLoader from "@/components/logo-loader";
 import { signIn } from "next-auth/react";
-import { Spinner } from "@/components/ui/spinner";
+import { useEffect } from "react";
 
 export default function SignInPage() {
   useEffect(() => {
@@ -18,8 +18,9 @@ export default function SignInPage() {
   }, []);
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <Spinner />
-    </div>
+    <>
+      <LogoLoader />
+      <p className="text-muted-foreground">Redirecting you to Zendesk</p>
+    </>
   );
 }

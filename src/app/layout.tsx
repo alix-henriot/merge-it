@@ -3,6 +3,13 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { SessionProvider } from "next-auth/react";
+import localFont from "next/font/local";
+
+const NohemiSemiBold = localFont({
+  src: "../../public/Nohemi-SemiBold.woff2",
+  variable: "--font-nohemi",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Merge it",
@@ -16,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <>
-      <html lang="en" suppressHydrationWarning>
+      <html lang="en" suppressHydrationWarning className={NohemiSemiBold.variable}>
         <head />
         <body>
           <SessionProvider>

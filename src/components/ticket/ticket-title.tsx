@@ -3,14 +3,12 @@ import { CardTitle } from "../ui/card";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "../ui/hover-card";
 import type { TicketComment } from "node-zendesk/clients/core/tickets";
 import type { User } from "node-zendesk/clients/core/users";
-import { CircleArrowDown, CircleArrowUp } from "lucide-react";
 import TicketComments from "./ticket-comments";
 
 interface Props {
   id: number;
   subject: string;
-  active?: boolean;
-  satisfaction_rating?: { score?: string };
+  isActive?: boolean;
   comments: TicketComment[];
   authors: Map<number, User>;
   onHoverLoadComments: (ticketId: number) => void;
@@ -20,8 +18,7 @@ interface Props {
 function TicketTitle({
   id,
   subject,
-  active,
-  satisfaction_rating,
+  isActive,
   comments,
   authors,
   onHoverLoadComments,
@@ -32,7 +29,7 @@ function TicketTitle({
       openDelay={300}
       closeDelay={100}
       onOpenChange={(open) => {
-        if (open && !active && comments.length === 0) {
+        if (open && !isActive && comments.length === 0) {
           onHoverLoadComments(id);
         }
       }}
@@ -40,17 +37,15 @@ function TicketTitle({
       <HoverCardTrigger asChild>
         <CardTitle
           onClick={() => onRedirect(id)}
-          className="text-sm truncate font-medium hover:underline hover:cursor-pointer"
+          className="flex items-baseline gap-2 text-sm truncate font-nohemi leading-loose hover:underline hover:cursor-pointer"
         >
-          {satisfaction_rating?.score === "good" && <CircleArrowUp className="mr-2 text-green-500"/>}
-          {satisfaction_rating?.score === "bad" && <CircleArrowDown className="mr-2 text-red-500"/>}
           {subject}
         </CardTitle>
       </HoverCardTrigger>
 
-      {!active && (
+      {!isActive && (
         <HoverCardContent align="start" className="max-h-44 overflow-scroll">
-          <TicketComments comments={comments} authors={authors}/>
+          <TicketComments comments={comments} authors={authors} />
         </HoverCardContent>
       )}
     </HoverCard>

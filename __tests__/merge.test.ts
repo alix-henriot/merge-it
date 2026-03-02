@@ -1,4 +1,4 @@
-jest.mock("../lib/auth", () => ({
+jest.mock("@/lib/auth", () => ({
   auth: jest.fn(),
 }));
 
@@ -39,8 +39,8 @@ describe("MergeTickets Unit Test Suites", () => {
   it("should throw an invalid Ticket ID error", async () => {
     await expect(
       mergeTickets({
-        sourceTicketId: tickets[0],
-        targetTicketId: tickets[0],
+        sourceId: tickets[0],
+        targetId: tickets[0],
       })
     ).rejects.toThrow("Cannot merge a Ticket into itself");
   });
@@ -49,24 +49,24 @@ describe("MergeTickets Unit Test Suites", () => {
     await expect(
       mergeTickets({
         // @ts-expect-error testing runtime validation
-        sourceTicketId: undefined,
-        targetTicketId: tickets[0],
+        sourceId: undefined,
+        targetId: tickets[0],
       })
     ).rejects.toThrow("Ticket IDs are required");
 
     await expect(
       mergeTickets({
-        sourceTicketId: tickets[0],
+        sourceId: tickets[0],
         // @ts-expect-error testing runtime validation
-        targetTicketId: undefined,
+        targetId: undefined,
       })
     ).rejects.toThrow("Ticket IDs are required");
     await expect(
       mergeTickets({
         // @ts-expect-error testing runtime validation
-        sourceTicketId: undefined,
+        sourceId: undefined,
         // @ts-expect-error testing runtime validation
-        targetTicketId: undefined,
+        targetId: undefined,
       })
     ).rejects.toThrow("Ticket IDs are required");
   });
@@ -76,8 +76,8 @@ describe("MergeTickets Unit Test Suites", () => {
 
     await expect(
       mergeTickets({
-        sourceTicketId: tickets[0],
-        targetTicketId: tickets[1],
+        sourceId: tickets[0],
+        targetId: tickets[1],
       })
     ).rejects.toThrow("Not authenticated with Zendesk");
   });
@@ -95,8 +95,8 @@ describe("MergeTickets Unit Test Suites", () => {
 
     await expect(
       mergeTickets({
-        sourceTicketId: tickets[0],
-        targetTicketId: tickets[1],
+        sourceId: tickets[0],
+        targetId: tickets[1],
       })
     ).rejects.toThrow("Invalid Zendesk Credentials");
   });
@@ -105,8 +105,8 @@ describe("MergeTickets Unit Test Suites", () => {
     await expect(
       mergeTickets({
         // Below are tickets ID that are closed and therefore can't be merged.
-        sourceTicketId: 2,
-        targetTicketId: 1,
+        sourceId: 2,
+        targetId: 1,
       })
     ).rejects.toThrow("Tickets cannot be merged");
   });
@@ -114,8 +114,8 @@ describe("MergeTickets Unit Test Suites", () => {
   it("should resolve when IDs are numbers and mergeable", async () => {
     await expect(
       mergeTickets({
-        sourceTicketId: tickets[0],
-        targetTicketId: tickets[1],
+        sourceId: tickets[0],
+        targetId: tickets[1],
       })
     ).resolves.toEqual({
       mergedFrom: tickets[0],
@@ -126,8 +126,8 @@ describe("MergeTickets Unit Test Suites", () => {
   it("should resolve when IDs are string and mergeable", async () => {
     await expect(
       mergeTickets({
-        sourceTicketId: String(tickets[2]),
-        targetTicketId: String(tickets[3]),
+        sourceId: String(tickets[2]),
+        targetId: String(tickets[3]),
       })
     ).resolves.toEqual({
       mergedFrom: tickets[2],

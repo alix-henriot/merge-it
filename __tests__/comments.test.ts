@@ -1,4 +1,4 @@
-jest.mock("../lib/auth", () => ({
+jest.mock("@/lib/auth", () => ({
   auth: jest.fn(),
 }));
 

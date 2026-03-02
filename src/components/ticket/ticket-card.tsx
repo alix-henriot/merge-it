@@ -42,7 +42,7 @@ function TicketCard({
 }: Props) {
   const isActive = active.id === ticket.id;
 
-  const disabled = !isActive && !isActiveTicketClosed && ticket.status !== "closed";
+  const disabled = !isActive && !isActiveTicketClosed && ticket.status !== "closed" || "solved";
 
   return (
     <Card

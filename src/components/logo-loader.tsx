@@ -1,6 +1,6 @@
 import { cn } from "@/lib/cn";
 
-export default function LogoLoader({ className }: { className?: string }) {
+export function LogoLoader({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 188 162" className={cn(className, "max-w-24")} fill="none">
       <g id="logo">

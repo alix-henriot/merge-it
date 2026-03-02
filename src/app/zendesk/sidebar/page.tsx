@@ -8,7 +8,7 @@ import { Ticket } from "node-zendesk/clients/core/tickets";
 import { useInstances } from "@/hooks/use-instances";
 import { Button } from "@/components/ui/button";
 import { useZendesk } from "@/hooks/use-zendesk";
-import LogoLoader from "@/components/logo-loader";
+import { LogoLoader } from "@/components/logo-loader";
 import { TicketMergeFormValues } from "@/components/ticket/ticket-merge-form";
 import { toast } from "sonner";
 
@@ -48,17 +48,6 @@ export default function Page() {
 
     return () => observer.disconnect();
   }, [resizeToContent]);
-
-  /* useEffect(() => {
-    if (tickets.length === 0) return;
-
-    setTickets((prev) =>
-      prev.map((t) => ({
-        ...t,
-        satisfaction_rating: { score: "good" }
-      }))
-    );
-  }, [tickets, setTickets]) */
 
   const handleMerge = async (sourceId: number, targetId: number, values: TicketMergeFormValues) => {
     if (!client || !currentUser) {

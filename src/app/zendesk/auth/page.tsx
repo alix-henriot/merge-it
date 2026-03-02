@@ -10,26 +10,27 @@ import { useZendesk } from "@/hooks/use-zendesk";
 import { History, Merge, MessagesSquare, Unplug } from "lucide-react";
 import Image from "next/image";
 
+interface Feature {
+  icon: React.ElementType;
+  description: string;
+}
+
+const features: Feature[] = [
+  { icon: History, description: "Check user’s ticket history" },
+  { icon: Merge, description: "Merge tickets in a single click" },
+  { icon: MessagesSquare, description: "See other ticket messages" },
+];
+
 export default function AuthSidebarPage() {
   const router = useRouter();
   const { subdomain, resizeToContent, currentUser } = useZendesk();
   const { status, update } = useSession();
   const containerRef = useRef<HTMLDivElement>(null);
-  
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-   useEffect(() => {
-    const id = requestAnimationFrame(() => {
-      resizeToContent(containerRef.current);
-    });
-
-    return () => cancelAnimationFrame(id);
-  }, []);
-
-  
-    useEffect(() => {
+  useEffect(() => {
     if (!containerRef.current) return;
 
     const observer = new ResizeObserver(() => {
@@ -41,9 +42,6 @@ export default function AuthSidebarPage() {
     return () => observer.disconnect();
   }, [resizeToContent]);
 
-  /**
-   * Persist Zendesk subdomain for API usage
-   */
   useEffect(() => {
     if (!subdomain) return;
 
@@ -51,12 +49,9 @@ export default function AuthSidebarPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ subdomain }),
-    })
+    }).catch(console.error);
   }, [subdomain]);
 
-  /**
-   * Listen for OAuth result from popup
-   */
   useMessage("authenticate", (_, payload) => {
     if (!payload?.success) {
       setIsLoading(false);
@@ -69,18 +64,14 @@ export default function AuthSidebarPage() {
 
   const handleSignIn = useCallback(() => {
     if (!subdomain) {
-      setError("Zendesk subdomain not detected.\nPlease ensure this page is opened from Zendesk.");
+      setError("Zendesk subdomain not detected. Please open this page from Zendesk.");
       return;
     }
 
     setIsLoading(true);
     setError(null);
-    const authUrl = `/auth/sign-in`;
 
-    const popup = window.open(
-      authUrl,
-      "zendesk-oauth",
-    );
+    const popup = window.open("/auth/sign-in", "zendesk-oauth");
 
     if (!popup) {
       setError("Popup blocked. Please allow popups for this app.");
@@ -98,52 +89,55 @@ export default function AuthSidebarPage() {
 
   if (status === "loading") {
     return (
-      <div className="flex h-full items-center justify-center p-3">
-        <Spinner />
+      <div className="flex h-full items-center justify-center p-4">
+        <Spinner aria-label="Loading session" />
       </div>
     );
   }
 
   return (
-    <div ref={containerRef} className="relative p-4">
-      <h2 className="text-3xl font-nohemi font-semibold text-primary mb-5">
-        Welcome <br/>
-        onboard, {" "}
-        {currentUser?.name.split(" ").slice(0, -1).join(" ")}
+    <div ref={containerRef} className="relative p-6">
+      <h2 className="text-3xl font-nohemi font-semibold text-primary mb-6">
+        Welcome onboard, {currentUser?.name.split(" ").slice(0, -1).join(" ")}
       </h2>
-      <span className="absolute top-4 right-4 aspect-square w-6">
-        <Image src="/logo.svg" className="" alt="Merge it Logo" fill/>
+
+      <span className="absolute top-4 right-4 w-6 h-6">
+        <Image src="/logo.svg" alt="Merge It Logo" fill />
       </span>
-      <div className="flex flex-col space-y-5 p-5 pb-6 rounded-xl text-sm bg-muted text-muted-foreground mb-6">
-        <div className="flex flex-row space-x-3 items-center">
-          <span className="p-2 border rounded-full aspect-square max-w-8">
-            <History className="size-full"/>
-          </span>
-          <p>Check user’s ticket history</p>
-        </div>
-        <div className="flex flex-row space-x-3 items-center">
-          <span className="p-2 border rounded-full aspect-square max-w-8">
-            <Merge className="size-full"/>
-          </span>
-          <p>Merge tickets in a single click</p>
-        </div>
-        <div className="flex flex-row space-x-3 items-center">
-          <span className="p-2 border rounded-full aspect-square max-w-8">
-            <MessagesSquare className="size-full"/>
-          </span>
-          <p>See other tickets messages</p>
-        </div>
+
+      <div className="flex flex-col space-y-4 p-5 rounded-xl text-sm bg-muted text-muted-foreground mb-6">
+        {features.map(({ icon: Icon, description }, idx) => (
+          <div key={idx} className="flex items-center space-x-3">
+            <span className="p-2 border rounded-full flex items-center justify-center w-8 h-8">
+              <Icon className="w-4 h-4" />
+            </span>
+            <p>{description}</p>
+          </div>
+        ))}
       </div>
 
-      <Button size="lg" className="w-full"
-      onClick={handleSignIn}
-            disabled={isLoading}
-      > 
-        {isLoading ? (<><Spinner className="h-4 w-4" /> {"Authenticatiion requested"}</>)
-            :
-          (<><Unplug/> {"Connect your Zendesk"}</>)}</Button>
-      <span className="text-xs text-danger">{error}</span>
-      <span className="text-xs text-muted-foreground">Merge It uses secure authentication via Zendesk OAuth.</span>
+      <Button
+        size="lg"
+        className="w-full flex items-center justify-center gap-2"
+        onClick={handleSignIn}
+        disabled={isLoading}
+        aria-busy={isLoading}
+      >
+        {isLoading ? (
+          <>
+            <Spinner className="h-4 w-4" /> Authenticating...
+          </>
+        ) : (
+          <>
+            <Unplug className="w-4 h-4" /> Connect your Zendesk
+          </>
+        )}
+      </Button>
+
+      {error && <p className="mt-2 text-xs text-danger">{error}</p>}
+      <p className="mt-1 text-xs text-muted-foreground">
+        Merge It uses secure authentication via Zendesk OAuth.
+      </p>
     </div>
   );
 }

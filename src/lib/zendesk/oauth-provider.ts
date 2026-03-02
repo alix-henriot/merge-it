@@ -1,6 +1,7 @@
 import { ZendeskProfile } from "next-auth";
 import type { OAuthConfig, OAuthUserConfig } from "next-auth/providers";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function Zendesk<P extends ZendeskProfile>(
   config: OAuthUserConfig<ZendeskProfile> & { subdomain?: string }
 ): OAuthConfig<ZendeskProfile> {

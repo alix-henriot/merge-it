@@ -35,7 +35,7 @@ export default function Page() {
     });
 
     return () => cancelAnimationFrame(id);
-  }, []);
+  }, [resizeToContent]);
 
   useEffect(() => {
     if (!containerRef.current) return;

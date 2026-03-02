@@ -20,7 +20,34 @@ type ZendeskState = {
   resizeToContent: (el?: HTMLElement | null) => void;
 };
 
+/**
+ * Internal React context storing Zendesk runtime state.
+ * @internal
+ */
 const ZendeskContext = createContext<ZendeskState | null>(null);
+
+
+/**
+ * Provides Zendesk runtime state to the application.
+ *
+ * Responsibilities:
+ * - Initializes Zendesk context data (user, ticket, subdomain)
+ * - Fetches requester ticket history
+ * - Handles pagination
+ * - Resolves assignee identities
+ * - Exposes iframe resize helper
+ *
+ * Must wrap any component using {@link useZendesk}.
+ *
+ * @param children React subtree requiring Zendesk context
+ *
+ * @example
+ * ```tsx
+ * <ZendeskProvider>
+ *   <App />
+ * </ZendeskProvider>
+ * ```
+ */
 
 export function ZendeskProvider({ children }: { children: ReactNode }) {
   const [client, setClient] = useState<ZAFClient | null>(null);
@@ -31,6 +58,15 @@ export function ZendeskProvider({ children }: { children: ReactNode }) {
   const [assignees, setAssignees] = useState<User[]>([]);
   const [nextPage, setNextPage] = useState<string | null>(null);
 
+
+  /**
+   * Resizes the Zendesk iframe to match the height of a given element.
+   *
+   * Useful when rendering dynamic content inside sidebar apps
+   * where Zendesk does not automatically adjust iframe height.
+   *
+   * @param el Element used to calculate height
+   */
   const resizeToContent = (el?: HTMLElement | null) => {
     if (!client || !el) return;
 
@@ -115,6 +151,12 @@ export function ZendeskProvider({ children }: { children: ReactNode }) {
     };
   }, [client, currentUser, activeTicket]);
 
+  /**
+   * Fetches the next page of requester tickets.
+   *
+   * Appends results to the existing ticket list.
+   * Does nothing if pagination cursor is missing.
+   */
   function getNextPage() {
     if (!client || !nextPage || !activeTicket) return;
 
@@ -177,10 +219,27 @@ export function ZendeskProvider({ children }: { children: ReactNode }) {
   return <ZendeskContext.Provider value={value}>{children}</ZendeskContext.Provider>;
 }
 
-/* ------------------------------------------------------------------ */
-/* Hook */
-/* ------------------------------------------------------------------ */
 
+/**
+ * Access the Zendesk application context.
+ *
+ * Provides runtime access to:
+ * - Client
+ * - Current user
+ * - Active ticket
+ * - Requester ticket history
+ * - Assignees
+ * - Pagination helpers
+ *
+ * @throws Error if used outside {@link ZendeskProvider}
+ *
+ * @returns {ZendeskState} Zendesk context state
+ *
+ * @example
+ * ```ts
+ * const { activeTicket, tickets, getNextPage } = useZendesk();
+ * ```
+ */
 export function useZendesk() {
   const ctx = useContext(ZendeskContext);
   if (!ctx) {

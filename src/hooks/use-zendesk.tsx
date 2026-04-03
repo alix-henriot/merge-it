@@ -5,6 +5,7 @@ import { ZAFClient } from "zafclient";
 import { User } from "node-zendesk/clients/core/users";
 import { Ticket } from "node-zendesk/clients/core/tickets";
 import { TicketWithAssignee } from "~/types/zendesk";
+import { useInstances } from "./use-instances";
 
 type ZendeskState = {
   client: ZAFClient | null;
@@ -57,6 +58,8 @@ export function ZendeskProvider({ children }: { children: ReactNode }) {
   const [tickets, setTickets] = useState<TicketWithAssignee[]>([]);
   const [assignees, setAssignees] = useState<User[]>([]);
   const [nextPage, setNextPage] = useState<string | null>(null);
+
+  const { spreadTicketUpdate } = useInstances(setTickets);
 
 
   /**
@@ -200,6 +203,31 @@ export function ZendeskProvider({ children }: { children: ReactNode }) {
     };
   }, [client, tickets]);
 
+  useEffect(() => {
+  if (!client) return;
+
+  const handleTicketUpdated = async () => {
+    const { ticket } = await client.get(["ticket"]);
+
+    const updatedTicket = ticket as unknown as Ticket;
+
+    spreadTicketUpdate({
+      id: updatedTicket.id,
+      data: {
+        status: updatedTicket.status,
+        assignee_id: updatedTicket.assignee_id,
+        updated_at: updatedTicket.updated_at,
+      },
+    });
+  };
+
+  client.on("ticket.updated", handleTicketUpdated);
+
+  return () => {
+    client.off("ticket.updated", handleTicketUpdated);
+  };
+}, [client, spreadTicketUpdate]);
+
   /* ---------------- context value ---------------- */
 
   const value: ZendeskState = {
@@ -213,7 +241,7 @@ export function ZendeskProvider({ children }: { children: ReactNode }) {
     getNextPage,
     assignees,
     setTickets,
-    resizeToContent,
+    resizeToContent
   };
 
   return <ZendeskContext.Provider value={value}>{children}</ZendeskContext.Provider>;

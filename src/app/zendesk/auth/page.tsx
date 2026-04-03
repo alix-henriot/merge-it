@@ -9,6 +9,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useZendesk } from "@/hooks/use-zendesk";
 import { History, Merge, MessagesSquare, Unplug } from "lucide-react";
 import Image from "next/image";
+import { useResize } from "@/hooks/use-resize";
 
 interface Feature {
   icon: React.ElementType;
@@ -23,25 +24,14 @@ const features: Feature[] = [
 
 export default function AuthSidebarPage() {
   const router = useRouter();
-  const { subdomain, resizeToContent, currentUser } = useZendesk();
+  const { subdomain, currentUser } = useZendesk();
   const { status, update } = useSession();
   const containerRef = useRef<HTMLDivElement>(null);
+  const { resizeToContent } = useZendesk();
+  useResize(containerRef, resizeToContent);
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const observer = new ResizeObserver(() => {
-      resizeToContent(containerRef.current);
-    });
-
-    observer.observe(containerRef.current);
-
-    return () => observer.disconnect();
-  }, [resizeToContent]);
-
   useEffect(() => {
     if (!subdomain) return;
 

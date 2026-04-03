@@ -40,13 +40,13 @@ type TicketUpdate = {
  * This will update ticket `123` across all mounted instances of the app.
  */
 
-export function useInstances() {
+export function useInstances(setTickets: React.Dispatch<React.SetStateAction<TicketWithAssignee[]>>) {
   const [updateTicket, setUpdateTicket] = useSessionStorage<TicketUpdate | null>(
     "ticket-update",
     null
   );
 
-  const { setTickets } = useZendesk();
+  //const { setTickets } = useZendesk();
 
   useEffect(() => {
     if (!updateTicket) return;

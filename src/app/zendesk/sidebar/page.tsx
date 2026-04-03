@@ -2,8 +2,7 @@
 
 import TicketCard from "@/components/ticket/ticket-card";
 import { mergeTickets } from "@/lib/zendesk/merge";
-import { useTicketCommentsCache } from "@/hooks/use-ticket-comments-cache";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Ticket } from "node-zendesk/clients/core/tickets";
 import { useInstances } from "@/hooks/use-instances";
 import { Button } from "@/components/ui/button";
@@ -11,6 +10,7 @@ import { useZendesk } from "@/hooks/use-zendesk";
 import { LogoLoader } from "@/components/logo-loader";
 import { TicketMergeFormValues } from "@/components/ticket/ticket-merge-form";
 import { toast } from "sonner";
+import { useResize } from "@/hooks/use-resize";
 
 export default function Page() {
   const {
@@ -19,35 +19,15 @@ export default function Page() {
     assignees,
     tickets,
     activeTicket,
-    resizeToContent,
     setTickets,
+    resizeToContent,
     nextPage,
     getNextPage,
   } = useZendesk();
-  const { spreadTicketUpdate } = useInstances();
+  const { spreadTicketUpdate } = useInstances(setTickets);
 
-  const { commentsByTicket, authorsByTicket, loadIfNeeded, invalidate } = useTicketCommentsCache();
   const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const id = requestAnimationFrame(() => {
-      resizeToContent(containerRef.current);
-    });
-
-    return () => cancelAnimationFrame(id);
-  }, [resizeToContent]);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const observer = new ResizeObserver(() => {
-      resizeToContent(containerRef.current);
-    });
-
-    observer.observe(containerRef.current);
-
-    return () => observer.disconnect();
-  }, [resizeToContent]);
+  useResize(containerRef, resizeToContent);
 
   const handleMerge = async (sourceId: number, targetId: number, values: TicketMergeFormValues) => {
     if (!client || !currentUser) {
@@ -77,7 +57,6 @@ export default function Page() {
         error: (err) => err.message ?? "Merge failed",
       });
       const result = await response.unwrap();
-      invalidate(sourceId);
       spreadTicketUpdate({
         id: result.mergedFrom,
         data: {
@@ -120,9 +99,6 @@ export default function Page() {
               isActiveTicketClosed={isActiveTicketClosed}
               handleMerge={handleMerge}
               onRedirect={handleRedirect}
-              comments={commentsByTicket[ticket.id] ?? []}
-              authors={authorsByTicket[ticket.id] ?? new Map()}
-              loadComments={loadIfNeeded}
               assignee={ticket.assignee_id ? assigneeMap.get(ticket.assignee_id) : undefined}
             />
           ))}

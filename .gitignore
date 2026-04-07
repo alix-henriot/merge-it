@@ -42,3 +42,6 @@ next-env.d.ts
 
 # .fetch-client
 /.fetch-client
+
+# .swc
+/.swc

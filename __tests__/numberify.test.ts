@@ -1,4 +1,4 @@
-import { numberify } from "@/utils/numberify";
+import { numberify } from "~/utils/numberify";
 
 describe("Numberify Unit Test Suites", () => {
   it("should throw when value is undefined", () => {

@@ -36,7 +36,7 @@ const config: Config = {
   coverageProvider: "v8",
 
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
+    '^@/(.*)$': '<rootDir>/$1',
   },
 
    /* "transform": {

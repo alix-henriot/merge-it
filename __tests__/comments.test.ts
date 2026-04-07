@@ -2,7 +2,7 @@ jest.mock("@/lib/auth", () => ({
   auth: jest.fn(),
 }));
 
-import { getTicketComments } from "@/lib/zendesk/comments";
+import { getTicketComments } from "~/lib/zendesk/comments";
 import { auth } from "@/lib/auth";
 
 const mockedAuth = auth as jest.Mock;

@@ -1,4 +1,4 @@
-import { Zendesk } from "@/lib/zendesk/oauth-provider";
+import { Zendesk } from "~/lib/zendesk/oauth-provider";
 
 beforeAll(() => {
   process.env.ZENDESK_CLIENT_ID = "test-client-id";

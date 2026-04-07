@@ -11,6 +11,7 @@ import { LogoLoader } from "@/components/logo-loader";
 import { TicketMergeFormValues } from "@/components/ticket/ticket-merge-form";
 import { toast } from "sonner";
 import { useResize } from "@/hooks/use-resize";
+import { useTicketCommentsCache } from "@/hooks/use-ticket-comments-cache";
 
 export default function Page() {
   const {
@@ -25,6 +26,7 @@ export default function Page() {
     getNextPage,
   } = useZendesk();
   const { spreadTicketUpdate } = useInstances(setTickets);
+  const { commentsByTicket, authorsByTicket, loadIfNeeded, invalidate } = useTicketCommentsCache()
 
   const containerRef = useRef<HTMLDivElement>(null);
   useResize(containerRef, resizeToContent);
@@ -95,6 +97,9 @@ export default function Page() {
             <TicketCard
               key={ticket.id}
               ticket={ticket}
+              authors={authorsByTicket[ticket.id] ?? []}
+              comments={commentsByTicket[ticket.id] ?? []}
+              loadComments={loadIfNeeded}
               active={activeTicket!}
               isActiveTicketClosed={isActiveTicketClosed}
               handleMerge={handleMerge}
